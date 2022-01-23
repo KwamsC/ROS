@@ -1,0 +1,21 @@
+<launch>
+  <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+  <arg name="configuration_basename" default="turtlebot3_lds_2d.lua"/>
+  <arg name="simulated" default="true"/>
+  <arg name="path" default="$(env PATH_TO_BAG)"/>
+
+  <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
+    <arg name="model" value="$(arg model)"/>
+  </include>
+
+  <node pkg="s2_slam" type="remote_bond.py" name="remote_bond" required="false" args="$(arg path)"/>
+  <node pkg="rosbag" type="record" name="rosbag_record" args="-a -q -o $(arg path)"/>
+  <node pkg="s2_slam" type="dumpcap_recorder.py" name="dumpcap_recorder" required="true"/>
+
+  <group if="$(arg simulated)">
+    <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_arena.launch">
+      <arg name="model" value="$(arg model)"/>
+    </include>
+  </group>
+
+</launch>
